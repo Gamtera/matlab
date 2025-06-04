@@ -44,13 +44,18 @@ documentsTrain = tokenizedDocument(trainData.Text);
 documentsTest  = tokenizedDocument(testData.Text);
 
 bag = bagOfWords(documentsTrain);
-bag = tfidf(bag);
 
-XTrain = bag.Counts;
+% Compute TF-IDF features manually
+XTrainRaw = bag.Counts;
+numDocuments = size(XTrainRaw, 1);
+df = sum(XTrainRaw > 0, 1);
+idf = log(numDocuments ./ (df + 1));
+XTrain = XTrainRaw .* idf;
 YTrain = trainData.Category;
 
 bagTest = bagOfWords(documentsTest, bag.Vocabulary);
-XTest = tfidf(bagTest).Counts;
+XTestRaw = bagTest.Counts;
+XTest = XTestRaw .* idf; % use same IDF weights
 YTest = testData.Category;
 
 %% Train classifier
